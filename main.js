@@ -3,7 +3,7 @@ function handleAuthRedirect() {
     const action = urlParams.get('action');
     
     if (action === 'signup') {
-        if (window.location.pathname.includes('auth.html')) {
+        if (window.location.pathname.includes('auth/auth.html')) {
             const authManager = new AuthManager();
             authManager.switchTab('register');
         }
@@ -15,9 +15,9 @@ function updateAuthLinks() {
     const signupBtn = document.querySelector('.btn-signup');
     const heroSignupBtn = document.querySelector('.btn-hero.btn-primary');
     
-    if (loginBtn) loginBtn.href = 'auth.html';
-    if (signupBtn) signupBtn.href = 'auth.html?action=signup';
-    if (heroSignupBtn) heroSignupBtn.href = 'auth.html?action=signup';
+    if (loginBtn) loginBtn.href = 'auth/auth.html';
+    if (signupBtn) signupBtn.href = 'auth/auth.html?action=signup';
+    if (heroSignupBtn) heroSignupBtn.href = 'auth/auth.html?action=signup';
 }
 // Чат поддержки 
 function createChatWidget() {
