@@ -32,7 +32,48 @@
             </div>
         </nav>
     </header>
-
+    <div class="chat-assistant">
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <div class="chat-avatar">H</div>
+                <div class="chat-header-info">
+                    <h3>Помощник Handshake</h3>
+                    <p>Онлайн • Готов помочь</p>
+                </div>
+                <button class="chat-close" id="chatClose">×</button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message message-bot">
+                    Привет! Я виртуальный помощник Handshake. Чем могу помочь?
+                </div>
+                <div class="message message-bot">
+                    Вот некоторые вопросы, которые вы можете задать:
+                </div>
+            </div>
+            
+            <div class="quick-questions" id="quickQuestions">
+                <div class="quick-question" data-question="Как создать профиль?">Как создать профиль?</div>
+                <div class="quick-question" data-question="Как найти стажировку?">Как найти стажировку?</div>
+                <div class="quick-question" data-question="Какие компании здесь есть?">Какие компании здесь есть?</div>
+                <div class="quick-question" data-question="Как подготовить резюме?">Как подготовить резюме?</div>
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Напишите ваш вопрос..." maxlength="200">
+                <button class="chat-send" id="chatSend">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <button class="chat-toggle" id="chatToggle">
+            <div class="chat-toggle-icon">?</div>
+        </button>
+    </div>
     <section class="hero">
         <div class="container">
             <div class="hero-content">

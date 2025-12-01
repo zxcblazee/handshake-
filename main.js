@@ -1,172 +1,129 @@
-function handleAuthRedirect() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get('action');
-    
-    if (action === 'signup') {
-        if (window.location.pathname.includes('auth/auth.html')) {
-            const authManager = new AuthManager();
-            authManager.switchTab('register');
-        }
-    }
-}
-function updateAuthLinks() {
-    // Обновляем ссылки в шапке
-    const loginBtn = document.querySelector('.btn-login');
-    const signupBtn = document.querySelector('.btn-signup');
-    const heroSignupBtn = document.querySelector('.btn-hero.btn-primary');
-    
-    if (loginBtn) loginBtn.href = 'auth/auth.html';
-    if (signupBtn) signupBtn.href = 'auth/auth.html?action=signup';
-    if (heroSignupBtn) heroSignupBtn.href = 'auth/auth.html?action=signup';
-}
-// Чат поддержки 
-function createChatWidget() {
-    const chatWidget = document.createElement('div');
-    chatWidget.className = 'chat-widget';
-    chatWidget.innerHTML = `
-        <div class="chat-header">
-            <span>💬 Поддержка Handshake</span>
-            <button class="chat-toggle">−</button>
-        </div>
-        <div class="chat-body">
-            <div class="chat-messages">
-                <div class="message bot-message">
-                    <div class="message-avatar">🤖</div>
-                    <div class="message-text">Привет! Я виртуальный помощник Handshake. Чем могу помочь?</div>
-                </div>
-            </div>
-            <div class="chat-input">
-                <input type="text" placeholder="Напишите ваш вопрос..." maxlength="500">
-                <button class="send-btn">➤</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(chatWidget);
-
-    // Функции чата
-    let isChatMinimized = false;
-
-    const toggleBtn = chatWidget.querySelector('.chat-toggle');
-    const sendBtn = chatWidget.querySelector('.send-btn');
-    const chatInput = chatWidget.querySelector('input');
-    const chatMessages = chatWidget.querySelector('.chat-messages');
-
-    // Переключение состояния чата
-    toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleChat();
-    });
-
-    // Развертывание чата при клике на заголовок
-    chatWidget.querySelector('.chat-header').addEventListener('click', (e) => {
-        if (e.target === toggleBtn) return;
-        if (isChatMinimized) {
-            toggleChat();
-        }
-    });
-
-    // Отправка сообщения
-    sendBtn.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
-
-    function toggleChat() {
-        isChatMinimized = !isChatMinimized;
-        chatWidget.classList.toggle('minimized');
-        toggleBtn.textContent = isChatMinimized ? '+' : '−';
-        
-        // Авто-скролл при разворачивании
-        if (!isChatMinimized) {
-            setTimeout(() => {
-                scrollToBottom();
-            }, 100);
-        }
-    }
-
-    function sendMessage() {
-        const message = chatInput.value.trim();
-        
-        if (message) {
-            // Добавляем сообщение пользователя
-            addMessage(message, 'user');
-            chatInput.value = '';
-            
-            // Имитация ответа бота
-            setTimeout(() => {
-                const botResponse = getBotResponse(message);
-                addMessage(botResponse, 'bot');
-            }, 1000);
-        }
-    }
-
-    function addMessage(text, sender) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}-message`;
-        
-        if (sender === 'user') {
-            messageDiv.innerHTML = `
-                <div class="message-text">${escapeHtml(text)}</div>
-                <div class="message-avatar">👤</div>
-            `;
-        } else {
-            messageDiv.innerHTML = `
-                <div class="message-avatar">🤖</div>
-                <div class="message-text">${escapeHtml(text)}</div>
-            `;
-        }
-        
-        chatMessages.appendChild(messageDiv);
-        scrollToBottom();
-    }
-
-    function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function getBotResponse(userMessage) {
-        const lowerMessage = userMessage.toLowerCase();
-        
-        
-        if (lowerMessage.includes('привет') || lowerMessage.includes('здравств')) {
-            return 'Привет! Рад вас видеть! Как я могу помочь с поиском работы или стажировки?';
-        } else if (lowerMessage.includes('работа') || lowerMessage.includes('ваканс')) {
-            return 'Для поиска работы перейдите в раздел "Для студентов" и используйте наш поиск вакансий. Тысячи компаний ждут вас!';
-        } else if (lowerMessage.includes('стажировк')) {
-            return 'Стажировки можно найти в том же разделе, что и вакансии. Рекомендую настроить фильтры по вашему направлению.';
-        } else if (lowerMessage.includes('резюме') || lowerMessage.includes('cv')) {
-            return 'В разделе "Карьерные советы" есть подробные инструкции по созданию эффективного резюме.';
-        } else if (lowerMessage.includes('собеседован')) {
-            return 'Подготовиться к собеседованию помогут материалы в разделе "Карьерные советы". Там есть примеры вопросов и ответов.';
-        } else if (lowerMessage.includes('регистрац') || lowerMessage.includes('аккаунт')) {
-            return 'Для регистрации нажмите кнопку "Регистрация" в правом верхнем углу сайта. Это займет всего несколько минут!';
-        } else if (lowerMessage.includes('спасибо') || lowerMessage.includes('благодар')) {
-            return 'Пожалуйста! Всегда рад помочь. Если есть еще вопросы - обращайтесь!';
-        } else if (lowerMessage.includes('пока') || lowerMessage.includes('до свидан')) {
-            return 'До свидания! Удачи в поиске работы. Возвращайтесь, если понадобится помощь!';
-        } else {
-            return 'Спасибо за вопрос! Для более детальной помощи рекомендую обратиться в наш центр поддержки через раздел "Свяжитесь с нами" в футере сайта.';
-        }
-    }
-
-    chatInput.focus();
-}
-
-// Создаем чат после загрузки DOM
+//Чат-Бот
 document.addEventListener('DOMContentLoaded', function() {
-    createChatWidget();
-    updateAuthLinks();
-    handleAuthRedirect();
-    console.log('Handshake loaded! 🚀');
-});
+            const chatToggle = document.getElementById('chatToggle');
+            const chatContainer = document.getElementById('chatContainer');
+            const chatClose = document.getElementById('chatClose');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSend = document.getElementById('chatSend');
+            const quickQuestions = document.getElementById('quickQuestions');
+            
+            // Открытие/закрытие чата
+            chatToggle.addEventListener('click', function() {
+                chatContainer.classList.toggle('open');
+                if (chatContainer.classList.contains('open')) {
+                    chatInput.focus();
+                }
+            });
+            
+            chatClose.addEventListener('click', function() {
+                chatContainer.classList.remove('open');
+            });
+            
+            // Ответы на частые вопросы
+            const botResponses = {
+                "Как создать профиль?": "Чтобы создать профиль на Handshake:\n\n1. Нажмите кнопку 'Регистрация' в правом верхнем углу\n2. Выберите тип аккаунта (студент, работодатель, карьерный центр)\n3. Заполните информацию о себе, добавив образование, навыки и опыт\n4. Загрузите резюме (опционально)\n5. Настройте параметры конфиденциальности\n6. Начните поиск возможностей!",
+                
+                "Как найти стажировку?": "Поиск стажировок на Handshake:\n\n• Используйте фильтры: по местоположению, отрасли, типу работы\n• Настройте оповещения о новых стажировках\n• Изучите компании из раздела 'Кто нанимает'\n• Посещайте виртуальные карьерные мероприятия\n• Связывайтесь напрямую с рекрутерами интересующих компаний",
+                
+                "Какие компании здесь есть?": "Handshake сотрудничает с 550,000+ работодателей, включая:\n\n• Крупные технологические компании (Яндекс, VK, Тинькофф)\n• Финансовые организации (Сбер, Газпромбанк)\n• Розничные сети (Ozon, Wildberries)\n• Стартапы и малый бизнес\n• Международные компании\n\nПолный список доступен в разделе 'Кто нанимает'",
+                
+                "Как подготовить резюме?": "Советы по резюме:\n\n1. Используйте четкую структуру\n2. Указывайте конкретные достижения (цифры, проценты)\n3. Адаптируйте резюме под каждую вакансию\n4. Проверьте грамматику и орфографию\n5. Добавьте ключевые слова из описания вакансии\n6. Сохраняйте в формате PDF\n\nВ разделе 'Карьерные советы' есть подробные руководства!"
+            };
+            
+            // Функция добавления сообщения в чат
+            function addMessage(text, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
+                
+                // Форматирование текста с переносами строк
+                const formattedText = text.replace(/\n/g, '<br>');
+                messageDiv.innerHTML = formattedText;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Функция имитации набора текста ботом
+            function simulateTyping(responseText) {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                
+                chatMessages.appendChild(typingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                setTimeout(() => {
+                    typingDiv.remove();
+                    addMessage(responseText, false);
+                }, 1500);
+            }
+            
+            // Обработка отправки сообщения
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+                
+                addMessage(message, true);
+                chatInput.value = '';
+                chatSend.disabled = true;
+                
+                // Имитация ответа бота
+                setTimeout(() => {
+                    let response = "Спасибо за ваш вопрос! Я могу помочь с информацией о создании профиля, поиске стажировок, компаниях-партнерах и подготовке резюме. Можете уточнить ваш запрос?";
+                    
+                    // Проверяем, есть ли готовый ответ
+                    for (const [question, answer] of Object.entries(botResponses)) {
+                        if (message.toLowerCase().includes(question.toLowerCase().replace('?', ''))) {
+                            response = answer;
+                            break;
+                        }
+                    }
+                    
+                    simulateTyping(response);
+                    chatSend.disabled = false;
+                }, 1000);
+            }
+            
+            // Отправка сообщения по нажатию Enter
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Отправка сообщения по клику на кнопку
+            chatSend.addEventListener('click', sendMessage);
+            
+            // Активация/деактивация кнопки отправки
+            chatInput.addEventListener('input', function() {
+                chatSend.disabled = !this.value.trim();
+            });
+            
+            // Быстрые вопросы
+            document.querySelectorAll('.quick-question').forEach(button => {
+                button.addEventListener('click', function() {
+                    const question = this.getAttribute('data-question');
+                    chatInput.value = question;
+                    sendMessage();
+                });
+            });
+            
+            // Закрытие чата при клике вне его области
+            document.addEventListener('click', function(event) {
+                if (!chatContainer.contains(event.target) && !chatToggle.contains(event.target)) {
+                    chatContainer.classList.remove('open');
+                }
+            });
+        });
 
+
+
+//Анимки
 document.addEventListener('DOMContentLoaded', function() {
     // Плавный скролл для навигационных ссылок
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
