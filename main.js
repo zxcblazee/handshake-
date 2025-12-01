@@ -166,3 +166,59 @@ document.addEventListener('DOMContentLoaded', function() {
     handleAuthRedirect();
     console.log('Handshake loaded! 🚀');
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Плавный скролл для навигационных ссылок
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            if(this.getAttribute('href') === '#') return;
+            
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if(targetId === '#start') return;
+            
+            const targetElement = document.querySelector(targetId);
+            if(targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // Анимация появления элементов при скролле
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+    
+    // Наблюдаем за карточками
+    document.querySelectorAll('.feature-card, .step, .tip-card, .employer-logo').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Добавляем класс для анимации
+    const style = document.createElement('style');
+    style.textContent = `
+        .feature-card, .step, .tip-card, .employer-logo {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .feature-card.animate-in, .step.animate-in, .tip-card.animate-in, .employer-logo.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    `;
+    document.head.appendChild(style);
+});
