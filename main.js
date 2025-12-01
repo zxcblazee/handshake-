@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const chatSend = document.getElementById('chatSend');
             const quickQuestions = document.getElementById('quickQuestions');
             
-            // Открытие/закрытие чата
             chatToggle.addEventListener('click', function() {
                 chatContainer.classList.toggle('open');
                 if (chatContainer.classList.contains('open')) {
@@ -20,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatContainer.classList.remove('open');
             });
             
-            // Ответы на частые вопросы
             const botResponses = {
                 "Как создать профиль?": "Чтобы создать профиль на Handshake:\n\n1. Нажмите кнопку 'Регистрация' в правом верхнем углу\n2. Выберите тип аккаунта (студент, работодатель, карьерный центр)\n3. Заполните информацию о себе, добавив образование, навыки и опыт\n4. Загрузите резюме (опционально)\n5. Настройте параметры конфиденциальности\n6. Начните поиск возможностей!",
                 
@@ -31,12 +29,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Как подготовить резюме?": "Советы по резюме:\n\n1. Используйте четкую структуру\n2. Указывайте конкретные достижения (цифры, проценты)\n3. Адаптируйте резюме под каждую вакансию\n4. Проверьте грамматику и орфографию\n5. Добавьте ключевые слова из описания вакансии\n6. Сохраняйте в формате PDF\n\nВ разделе 'Карьерные советы' есть подробные руководства!"
             };
             
-            // Функция добавления сообщения в чат
+
             function addMessage(text, isUser = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
                 
-                // Форматирование текста с переносами строк
+                // Форматирование 
                 const formattedText = text.replace(/\n/g, '<br>');
                 messageDiv.innerHTML = formattedText;
                 
@@ -44,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
             
-            // Функция имитации набора текста ботом
+            // набора текста 
             function simulateTyping(responseText) {
                 const typingDiv = document.createElement('div');
                 typingDiv.className = 'typing-indicator';
@@ -63,7 +61,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 1500);
             }
             
-            // Обработка отправки сообщения
             function sendMessage() {
                 const message = chatInput.value.trim();
                 if (!message) return;
@@ -72,11 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatInput.value = '';
                 chatSend.disabled = true;
                 
-                // Имитация ответа бота
                 setTimeout(() => {
                     let response = "Спасибо за ваш вопрос! Я могу помочь с информацией о создании профиля, поиске стажировок, компаниях-партнерах и подготовке резюме. Можете уточнить ваш запрос?";
                     
-                    // Проверяем, есть ли готовый ответ
+                    // готовый ответ?
                     for (const [question, answer] of Object.entries(botResponses)) {
                         if (message.toLowerCase().includes(question.toLowerCase().replace('?', ''))) {
                             response = answer;
@@ -89,22 +85,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 1000);
             }
             
-            // Отправка сообщения по нажатию Enter
             chatInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();
                 }
             });
             
-            // Отправка сообщения по клику на кнопку
             chatSend.addEventListener('click', sendMessage);
             
-            // Активация/деактивация кнопки отправки
             chatInput.addEventListener('input', function() {
                 chatSend.disabled = !this.value.trim();
             });
             
-            // Быстрые вопросы
             document.querySelectorAll('.quick-question').forEach(button => {
                 button.addEventListener('click', function() {
                     const question = this.getAttribute('data-question');
@@ -113,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
             
-            // Закрытие чата при клике вне его области
+            // Закрытие чата 
             document.addEventListener('click', function(event) {
                 if (!chatContainer.contains(event.target) && !chatToggle.contains(event.target)) {
                     chatContainer.classList.remove('open');
@@ -125,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 //Анимки
 document.addEventListener('DOMContentLoaded', function() {
-    // Плавный скролл для навигационных ссылок
+
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             if(this.getAttribute('href') === '#') return;
@@ -144,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Анимация появления элементов при скролле
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -158,12 +149,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, observerOptions);
     
-    // Наблюдаем за карточками
     document.querySelectorAll('.feature-card, .step, .tip-card, .employer-logo').forEach(el => {
         observer.observe(el);
     });
     
-    // Добавляем класс для анимации
     const style = document.createElement('style');
     style.textContent = `
         .feature-card, .step, .tip-card, .employer-logo {
