@@ -170,68 +170,64 @@ class AuthManager {
         return strength;
     }
 
-    async handleLogin(e) {
-        e.preventDefault();
-        this.clearErrors();
+  async handleLogin(e) {
+    e.preventDefault();
+    this.clearErrors();
 
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const rememberMe = document.getElementById('rememberMe').checked;
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
 
-        let isValid = true;
+    let isValid = true;
 
-        if (!email) {
-            this.showError('loginEmail', 'Email обязателен');
-            isValid = false;
-        } else if (!this.validateEmail(email)) {
-            this.showError('loginEmail', 'Введите корректный email');
-            isValid = false;
-        }
-
-        if (!password) {
-            this.showError('loginPassword', 'Пароль обязателен');
-            isValid = false;
-        } else if (password.length < 6) {
-            this.showError('loginPassword', 'Пароль должен содержать минимум 6 символов');
-            isValid = false;
-        }
-
-        if (!isValid) return;
-
-        try {
-            // Поиск пользователя в базе данных
-            const user = this.db.getUserByEmail(email);
-            
-            if (!user) {
-                throw new Error('Пользователь не найден');
-            }
-
-            if (user.password !== password) {
-                throw new Error('Неверный пароль');
-            }
-
-            // Создание сессии
-            this.db.createSession(user.id);
-            
-            // Сохранение данных для "Запомнить меня"
-            if (rememberMe) {
-                localStorage.setItem('handshake_remember', JSON.stringify({ email }));
-            } else {
-                localStorage.removeItem('handshake_remember');
-            }
-
-            this.showNotification('Успешный вход!', 'success');
-            
-            // Перенаправление на главную страницу
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
-
-        } catch (error) {
-            this.showError('loginPassword', 'Неверный email или пароль');
-        }
+    if (!email) {
+        this.showError('loginEmail', 'Email обязателен');
+        isValid = false;
+    } else if (!this.validateEmail(email)) {
+        this.showError('loginEmail', 'Введите корректный email');
+        isValid = false;
     }
 
+    if (!password) {
+        this.showError('loginPassword', 'Пароль обязателен');
+        isValid = false;
+    } else if (password.length < 6) {
+        this.showError('loginPassword', 'Пароль должен содержать минимум 6 символов');
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    try {
+        const user = this.db.getUserByEmail(email);
+        
+        if (!user) {
+            throw new Error('Пользователь не найден');
+        }
+
+        if (user.password !== password) {
+            throw new Error('Неверный пароль');
+        }
+
+        this.db.createSession(user.id);
+        
+        if (rememberMe) {
+            localStorage.setItem('handshake_remember', JSON.stringify({ email }));
+        } else {
+            localStorage.removeItem('handshake_remember');
+        }
+
+        this.showNotification('Успешный вход!', 'success');
+        
+        // ИСПРАВЛЕНО: перенаправление на главную страницу
+        setTimeout(() => {
+            window.location.href = 'index.html'; // ИСПРАВЛЕН ПУТЬ
+        }, 1500);
+
+    } catch (error) {
+        this.showError('loginPassword', 'Неверный email или пароль');
+    }
+}
     async handleRegister(e) {
         e.preventDefault();
         this.clearErrors();
