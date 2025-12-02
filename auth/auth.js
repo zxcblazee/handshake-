@@ -2,8 +2,8 @@
 class AuthManager {
     constructor() {
         this.currentTab = 'login';
-        this.db = window.db; // Используем нашу базу данных
-        this.db.seedTestData(); // Инициализируем тестовые данные
+        this.db = window.db;
+        this.db.seedTestData();
         this.handleUrlParams();
         this.init();
     }
@@ -20,21 +20,18 @@ class AuthManager {
     init() {
         this.bindEvents();
         this.checkExistingAuth();
-        this.updateHeaderAuthButtons(); // Обновляем кнопки в хедере
+        this.updateHeaderAuthButtons();
+        // Установить начальную вкладку
+        this.switchTab(this.currentTab, true);
     }
 
     bindEvents() {
         // Переключение между вкладками
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.switchTab(e.target.dataset.tab);
             });
-        });
-
-        // Переключение через ссылку
-        document.getElementById('switchToRegister').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.switchTab('register');
         });
 
         // Обработка форм
@@ -70,40 +67,57 @@ class AuthManager {
         });
     }
 
-    switchTab(tab) {
+    switchTab(tab, initial = false) {
         this.currentTab = tab;
         
-        const newUrl = new URL(window.location);
-        if (tab === 'register') {
-            newUrl.searchParams.set('action', 'signup');
-        } else {
-            newUrl.searchParams.delete('action');
+        // Обновление URL только если не начальная загрузка
+        if (!initial) {
+            const newUrl = new URL(window.location);
+            if (tab === 'register') {
+                newUrl.searchParams.set('action', 'signup');
+            } else {
+                newUrl.searchParams.delete('action');
+            }
+            window.history.replaceState({}, '', newUrl);
         }
-        window.history.replaceState({}, '', newUrl);
         
+        // Обновление активных кнопок табов
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
 
+        // Показать/скрыть формы
         document.querySelectorAll('.auth-form').forEach(form => {
             form.classList.toggle('active', form.id === `${tab}Form`);
         });
 
+        // Обновление текста переключения
         const switchText = document.getElementById('switchText');
-        const switchLink = document.getElementById('switchToRegister');
         
         if (tab === 'login') {
             switchText.innerHTML = 'Еще нет аккаунта? <a href="#" id="switchToRegister">Зарегистрироваться</a>';
         } else {
-            switchText.innerHTML = 'Уже есть аккаунт? <a href="#" id="switchToRegister">Войти</a>';
+            switchText.innerHTML = 'Уже есть аккаунта? <a href="#" id="switchToRegister">Войти</a>';
         }
 
-        document.getElementById('switchToRegister').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.switchTab(tab === 'login' ? 'register' : 'login');
-        });
-
+        // Обновляем обработчик для новой ссылки
+        this.updateSwitchLink();
+        
         this.clearErrors();
+    }
+
+    updateSwitchLink() {
+        // Удаляем старый обработчик и добавляем новый
+        const oldLink = document.getElementById('switchToRegister');
+        if (oldLink) {
+            const newLink = oldLink.cloneNode(true);
+            oldLink.parentNode.replaceChild(newLink, oldLink);
+            
+            newLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchTab(this.currentTab === 'login' ? 'register' : 'login');
+            });
+        }
     }
 
     clearErrors() {
