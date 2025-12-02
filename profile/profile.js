@@ -1,88 +1,65 @@
 
 class ProfileManager {
     constructor() {
-        this.currentUser = this.loadUserData();
+        this.db = window.db; // Используем нашу базу данных
+        this.currentUser = this.db.getCurrentUser();
+        this.currentProfile = this.db.getCurrentProfile();
         this.currentTab = 'about';
+        
+        if (!this.currentUser) {
+            // Если пользователь не авторизован, перенаправляем на страницу входа
+            window.location.href = 'auth/auth.html';
+            return;
+        }
+        
         this.init();
     }
 
     init() {
-        this.bindEvents();
         this.loadProfileData();
+        this.bindEvents();
         this.updateUI();
     }
 
-    loadUserData() {
-        // Загрузка данных пользователя из localStorage или API
-        const savedData = localStorage.getItem('handshake_user_profile');
-        if (savedData) {
-            return JSON.parse(savedData);
+    loadProfileData() {
+        if (!this.currentProfile) {
+            // Создаем профиль если его нет
+            this.currentProfile = this.db.createProfile({
+                userId: this.currentUser.id,
+                name: `${this.currentUser.firstName} ${this.currentUser.lastName}`,
+                title: this.currentUser.userType === 'student' ? 'Студент' : 
+                       this.currentUser.userType === 'employer' ? 'Работодатель' : 'Карьерный центр',
+                location: '',
+                about: '',
+                skills: [],
+                languages: [],
+                education: [],
+                experience: [],
+                careerGoals: [],
+                settings: {
+                    visibility: 'employers',
+                    notifications: {
+                        email: true,
+                        messages: true,
+                        jobs: false,
+                        views: true
+                    },
+                    emailFrequency: 'weekly'
+                }
+            });
         }
 
-        // Данные по умолчанию
-        return {
-            name: "Иван Иванов",
-            title: "Студент, МГУ им. Ломоносова",
-            location: "Москва, Россия",
-            profileViews: 128,
-            connections: 47,
-            about: "Студент 3-го курса факультета вычислительной математики и кибернетики. Увлекаюсь веб-разработкой, машинным обучением и анализом данных. Ищу стажировку в IT-компании для применения знаний на практике и профессионального роста.",
-            skills: ["JavaScript", "Python", "React", "UI/UX Дизайн", "Английский язык"],
-            languages: [
-                { name: "Русский", level: "Родной" },
-                { name: "Английский", level: "B2" }
-            ],
-            education: [
-                {
-                    institution: "МГУ им. Ломоносова",
-                    degree: "Бакалавр информатики",
-                    period: "2021 - 2025"
-                }
-            ],
-            careerGoals: [
-                "Найти стажировку frontend-разработчика",
-                "Выучить TypeScript и Redux",
-                "Построить профессиональную сеть контактов"
-            ],
-            experience: [
-                {
-                    title: "Frontend-разработчик (стажировка)",
-                    company: "ООО 'Технологии Будущего'",
-                    description: "Разработка пользовательского интерфейса для внутренней системы управления. Работа с React, Redux, TypeScript.",
-                    period: "Лето 2023"
-                },
-                {
-                    title: "Фриланс-разработчик",
-                    company: "Самостоятельная занятость",
-                    description: "Создание веб-сайтов и приложений для малого бизнеса. Работа с клиентами, проектирование, разработка и поддержка.",
-                    period: "2022 - наст. время"
-                }
-            ],
-            settings: {
-                visibility: "employers",
-                notifications: {
-                    email: true,
-                    messages: true,
-                    jobs: false,
-                    views: true
-                },
-                emailFrequency: "weekly"
-            }
-        };
-    }
-
-    saveUserData() {
-        localStorage.setItem('handshake_user_profile', JSON.stringify(this.currentUser));
-    }
-
-    loadProfileData() {
         // Обновление UI с данными пользователя
-        document.getElementById('userName').textContent = this.currentUser.name;
-        document.getElementById('userTitle').textContent = this.currentUser.title;
-        document.getElementById('userLocation').textContent = this.currentUser.location;
-        document.getElementById('profileViews').textContent = this.currentUser.profileViews;
-        document.getElementById('connections').textContent = this.currentUser.connections;
-        document.getElementById('aboutText').textContent = this.currentUser.about;
+        document.getElementById('userName').textContent = this.currentProfile.name || 'Не указано';
+        document.getElementById('userTitle').textContent = this.currentProfile.title || 'Не указано';
+        document.getElementById('userLocation').textContent = this.currentProfile.location || 'Не указано';
+        document.getElementById('aboutText').textContent = this.currentProfile.about || 'Расскажите о себе...';
+        
+        // Статистика
+        if (this.currentProfile.stats) {
+            document.getElementById('profileViews').textContent = this.currentProfile.stats.profileViews || 0;
+            document.getElementById('connections').textContent = this.currentProfile.stats.connections || 0;
+        }
         
         // Навыки
         this.updateSkillsList();
@@ -98,6 +75,16 @@ class ProfileManager {
         
         // Настройки
         this.updateSettings();
+        
+        // Обновление аватара пользователя
+        this.updateUserAvatar();
+    }
+
+    updateUserAvatar() {
+        const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${this.currentUser.email || 'user'}`;
+        document.querySelectorAll('.user-avatar img, #userAvatar').forEach(img => {
+            img.src = avatarUrl;
+        });
     }
 
     bindEvents() {
@@ -122,7 +109,7 @@ class ProfileManager {
         // Выход из аккаунта
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if (confirm('Вы уверены, что хотите выйти?')) {
-                localStorage.removeItem('handshake_auth');
+                this.db.logout();
                 window.location.href = 'index.html';
             }
         });
@@ -140,16 +127,6 @@ class ProfileManager {
         // Добавление навыков
         document.getElementById('addSkillBtn').addEventListener('click', () => {
             this.openAddSkillModal();
-        });
-
-        // Удаление навыков
-        document.querySelectorAll('.skill-remove').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const skill = e.target.closest('.skill-tag');
-                const skillName = skill.textContent.trim().replace('×', '');
-                this.removeSkill(skillName);
-            });
         });
 
         // Редактирование разделов
@@ -207,46 +184,6 @@ class ProfileManager {
             this.openAvatarUploadModal();
         });
 
-        document.getElementById('browseAvatarBtn').addEventListener('click', () => {
-            document.getElementById('avatarFile').click();
-        });
-
-        document.getElementById('avatarFile').addEventListener('change', (e) => {
-            this.handleAvatarSelect(e.target.files[0]);
-        });
-
-        document.getElementById('saveAvatarBtn').addEventListener('click', () => {
-            this.saveAvatar();
-        });
-
-        // Drag & drop для аватара
-        const dropArea = document.getElementById('avatarDropArea');
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            });
-        });
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => {
-                dropArea.classList.add('dragover');
-            });
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => {
-                dropArea.classList.remove('dragover');
-            });
-        });
-
-        dropArea.addEventListener('drop', (e) => {
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                this.handleAvatarSelect(file);
-            }
-        });
-
         // Формы настроек
         document.getElementById('settingsForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -296,12 +233,10 @@ class ProfileManager {
     switchTab(tabName) {
         this.currentTab = tabName;
         
-        // Обновление активной кнопки
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabName);
         });
 
-        // Показать активный контент
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.toggle('active', content.id === tabName + 'Tab');
         });
@@ -312,21 +247,20 @@ class ProfileManager {
         const title = document.getElementById('modalTitle');
         const field = document.getElementById('editField');
         
-        // Установка заголовка и значения
         switch(section) {
             case 'about':
                 title.textContent = 'Редактирование "О себе"';
-                field.value = this.currentUser.about;
+                field.value = this.currentProfile.about || '';
                 field.dataset.section = 'about';
                 break;
             case 'goals':
                 title.textContent = 'Редактирование целей карьеры';
-                field.value = this.currentUser.careerGoals.join('\n');
+                field.value = (this.currentProfile.careerGoals || []).join('\n');
                 field.dataset.section = 'goals';
                 break;
             case 'profile':
                 title.textContent = 'Редактирование профиля';
-                field.value = `${this.currentUser.name}\n${this.currentUser.title}\n${this.currentUser.location}`;
+                field.value = `${this.currentProfile.name}\n${this.currentProfile.title}\n${this.currentProfile.location}`;
                 field.dataset.section = 'profile';
                 break;
         }
@@ -344,23 +278,46 @@ class ProfileManager {
     }
 
     openAddEducationModal() {
-        alert('Добавление образования будет реализовано в следующем обновлении');
+        this.showModalForm('education', 'Добавить образование');
     }
 
     openAddLanguageModal() {
-        alert('Добавление языка будет реализовано в следующем обновлении');
+        this.showModalForm('language', 'Добавить язык');
     }
 
     openAddExperienceModal() {
-        alert('Добавление опыта работы будет реализовано в следующем обновлении');
+        this.showModalForm('experience', 'Добавить опыт работы');
     }
 
     openAddProjectModal() {
-        alert('Добавление проекта будет реализовано в следующем обновлении');
+        this.showModalForm('project', 'Добавить проект');
     }
 
     openAddPortfolioModal() {
         alert('Добавление работы в портфолио будет реализовано в следующем обновлении');
+    }
+
+    showModalForm(type, title) {
+        const modal = document.getElementById('editModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const field = document.getElementById('editField');
+        
+        modalTitle.textContent = title;
+        field.value = '';
+        field.dataset.section = `add_${type}`;
+        field.placeholder = this.getPlaceholderForType(type);
+        
+        modal.classList.add('show');
+    }
+
+    getPlaceholderForType(type) {
+        switch(type) {
+            case 'education': return 'Вуз\nСпециальность\nГоды обучения (напр. 2021-2025)';
+            case 'language': return 'Язык\nУровень (напр. B2, Родной)';
+            case 'experience': return 'Должность\nКомпания\nОписание\nПериод работы';
+            case 'project': return 'Название проекта\nОписание\nТехнологии';
+            default: return 'Введите информацию...';
+        }
     }
 
     closeAllModals() {
@@ -378,32 +335,61 @@ class ProfileManager {
         const value = field.value.trim();
 
         if (!value) {
-            alert('Поле не может быть пустым');
+            this.showNotification('Поле не может быть пустым', 'error');
             return;
         }
 
         switch(section) {
             case 'about':
-                this.currentUser.about = value;
+                this.currentProfile.about = value;
                 document.getElementById('aboutText').textContent = value;
                 break;
             case 'goals':
-                this.currentUser.careerGoals = value.split('\n').filter(g => g.trim());
+                this.currentProfile.careerGoals = value.split('\n').filter(g => g.trim());
                 this.updateCareerGoals();
                 break;
             case 'profile':
                 const lines = value.split('\n');
-                this.currentUser.name = lines[0] || this.currentUser.name;
-                this.currentUser.title = lines[1] || this.currentUser.title;
-                this.currentUser.location = lines[2] || this.currentUser.location;
+                this.currentProfile.name = lines[0] || this.currentProfile.name;
+                this.currentProfile.title = lines[1] || this.currentProfile.title;
+                this.currentProfile.location = lines[2] || this.currentProfile.location;
                 
-                document.getElementById('userName').textContent = this.currentUser.name;
-                document.getElementById('userTitle').textContent = this.currentUser.title;
-                document.getElementById('userLocation').textContent = this.currentUser.location;
+                document.getElementById('userName').textContent = this.currentProfile.name;
+                document.getElementById('userTitle').textContent = this.currentProfile.title;
+                document.getElementById('userLocation').textContent = this.currentProfile.location;
+                break;
+            case 'add_education':
+                const eduLines = value.split('\n');
+                const educationItem = {
+                    institution: eduLines[0] || '',
+                    degree: eduLines[1] || '',
+                    period: eduLines[2] || ''
+                };
+                
+                if (!this.currentProfile.education) {
+                    this.currentProfile.education = [];
+                }
+                this.currentProfile.education.push(educationItem);
+                this.updateEducationList();
+                break;
+            case 'add_language':
+                const langLines = value.split('\n');
+                const languageItem = {
+                    name: langLines[0] || '',
+                    level: langLines[1] || ''
+                };
+                
+                if (!this.currentProfile.languages) {
+                    this.currentProfile.languages = [];
+                }
+                this.currentProfile.languages.push(languageItem);
+                this.updateLanguagesList();
                 break;
         }
 
-        this.saveUserData();
+        // Сохраняем изменения в базе данных
+        this.db.updateProfile(this.currentUser.id, this.currentProfile);
+        
         this.showNotification('Изменения сохранены успешно!', 'success');
         this.closeAllModals();
     }
@@ -413,18 +399,24 @@ class ProfileManager {
         const skill = skillInput.value.trim();
 
         if (!skill) {
-            alert('Введите название навыка');
+            this.showNotification('Введите название навыка', 'error');
             return;
         }
 
-        if (this.currentUser.skills.includes(skill)) {
-            alert('Этот навык уже добавлен');
+        if (!this.currentProfile.skills) {
+            this.currentProfile.skills = [];
+        }
+
+        if (this.currentProfile.skills.includes(skill)) {
+            this.showNotification('Этот навык уже добавлен', 'warning');
             return;
         }
 
-        this.currentUser.skills.push(skill);
+        this.currentProfile.skills.push(skill);
         this.updateSkillsList();
-        this.saveUserData();
+        
+        // Сохраняем в базе данных
+        this.db.updateProfile(this.currentUser.id, { skills: this.currentProfile.skills });
         
         skillInput.value = '';
         this.closeAllModals();
@@ -432,9 +424,12 @@ class ProfileManager {
     }
 
     removeSkill(skillName) {
-        this.currentUser.skills = this.currentUser.skills.filter(s => s !== skillName);
+        this.currentProfile.skills = (this.currentProfile.skills || []).filter(s => s !== skillName);
         this.updateSkillsList();
-        this.saveUserData();
+        
+        // Сохраняем в базе данных
+        this.db.updateProfile(this.currentUser.id, { skills: this.currentProfile.skills });
+        
         this.showNotification('Навык удален', 'info');
     }
 
@@ -442,7 +437,7 @@ class ProfileManager {
         const skillsList = document.getElementById('skillsList');
         skillsList.innerHTML = '';
 
-        this.currentUser.skills.forEach(skill => {
+        (this.currentProfile.skills || []).forEach(skill => {
             const skillTag = document.createElement('span');
             skillTag.className = 'skill-tag';
             skillTag.innerHTML = `
@@ -463,7 +458,7 @@ class ProfileManager {
         const languagesList = document.getElementById('languagesList');
         languagesList.innerHTML = '';
 
-        this.currentUser.languages.forEach(lang => {
+        (this.currentProfile.languages || []).forEach(lang => {
             const langItem = document.createElement('div');
             langItem.className = 'language-item';
             langItem.innerHTML = `
@@ -478,7 +473,7 @@ class ProfileManager {
         const educationList = document.getElementById('educationList');
         educationList.innerHTML = '';
 
-        this.currentUser.education.forEach(edu => {
+        (this.currentProfile.education || []).forEach(edu => {
             const eduCard = document.createElement('div');
             eduCard.className = 'education-card';
             eduCard.innerHTML = `
@@ -494,7 +489,7 @@ class ProfileManager {
         const goalsList = document.getElementById('careerGoals');
         goalsList.innerHTML = '';
 
-        this.currentUser.careerGoals.forEach(goal => {
+        (this.currentProfile.careerGoals || []).forEach(goal => {
             const goalItem = document.createElement('div');
             goalItem.className = 'goal-item';
             goalItem.innerHTML = `
@@ -506,21 +501,24 @@ class ProfileManager {
     }
 
     updateSettings() {
-        // Видимость профиля
-        document.getElementById('visibility').value = this.currentUser.settings.visibility;
-        
-        // Уведомления
-        document.getElementById('notifEmail').checked = this.currentUser.settings.notifications.email;
-        document.getElementById('notifMessages').checked = this.currentUser.settings.notifications.messages;
-        document.getElementById('notifJobs').checked = this.currentUser.settings.notifications.jobs;
-        document.getElementById('notifViews').checked = this.currentUser.settings.notifications.views;
-        
-        // Частота рассылок
-        document.getElementById('emailFrequency').value = this.currentUser.settings.emailFrequency;
+        if (this.currentProfile.settings) {
+            // Видимость профиля
+            document.getElementById('visibility').value = this.currentProfile.settings.visibility || 'employers';
+            
+            // Уведомления
+            const notifs = this.currentProfile.settings.notifications || {};
+            document.getElementById('notifEmail').checked = notifs.email !== false;
+            document.getElementById('notifMessages').checked = notifs.messages !== false;
+            document.getElementById('notifJobs').checked = notifs.jobs || false;
+            document.getElementById('notifViews').checked = notifs.views !== false;
+            
+            // Частота рассылок
+            document.getElementById('emailFrequency').value = this.currentProfile.settings.emailFrequency || 'weekly';
+        }
     }
 
     saveSettings() {
-        this.currentUser.settings = {
+        this.currentProfile.settings = {
             visibility: document.getElementById('visibility').value,
             notifications: {
                 email: document.getElementById('notifEmail').checked,
@@ -531,7 +529,9 @@ class ProfileManager {
             emailFrequency: document.getElementById('emailFrequency').value
         };
 
-        this.saveUserData();
+        // Сохраняем в базе данных
+        this.db.updateProfile(this.currentUser.id, { settings: this.currentProfile.settings });
+        
         this.showNotification('Настройки сохранены успешно!', 'success');
     }
 
@@ -555,7 +555,15 @@ class ProfileManager {
             return;
         }
 
-        // В реальном приложении здесь был бы запрос к серверу
+        // Проверяем текущий пароль
+        if (this.currentUser.password !== currentPassword) {
+            this.showNotification('Текущий пароль неверен', 'error');
+            return;
+        }
+
+        // Обновляем пароль
+        this.db.updateUser(this.currentUser.id, { password: newPassword });
+        
         this.showNotification('Пароль успешно изменен!', 'success');
         
         // Очистка полей
@@ -602,12 +610,12 @@ class ProfileManager {
 
     handleAvatarSelect(file) {
         if (!file || !file.type.startsWith('image/')) {
-            alert('Пожалуйста, выберите изображение');
+            this.showNotification('Пожалуйста, выберите изображение', 'error');
             return;
         }
 
         if (file.size > 5 * 1024 * 1024) {
-            alert('Размер файла не должен превышать 5MB');
+            this.showNotification('Размер файла не должен превышать 5MB', 'error');
             return;
         }
 
@@ -627,7 +635,6 @@ class ProfileManager {
         const userAvatar = document.getElementById('userAvatar');
         const headerAvatar = document.querySelector('.user-avatar img');
         
-        // Обновление аватаров
         userAvatar.src = img.src;
         headerAvatar.src = img.src;
         
@@ -653,22 +660,51 @@ class ProfileManager {
     }
 
     deleteAccount() {
-        // В реальном приложении здесь был бы запрос к серверу
-        localStorage.removeItem('handshake_user_profile');
-        localStorage.removeItem('handshake_auth');
-        
-        this.showNotification('Аккаунт успешно удален', 'info');
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 2000);
+        if (confirm('Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.')) {
+            // В реальном приложении здесь был бы запрос к серверу
+            this.db.logout();
+            
+            // Очистка данных пользователя
+            const data = this.db.getData();
+            data.users = data.users.filter(user => user.id !== this.currentUser.id);
+            data.profiles = data.profiles.filter(profile => profile.userId !== this.currentUser.id);
+            this.db.saveData(data);
+            
+            this.showNotification('Аккаунт успешно удален', 'info');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
     }
 
     showFullStats() {
-        alert('Подробная статистика будет доступна в следующем обновлении');
+        // Увеличиваем счетчик просмотров
+        if (!this.currentProfile.stats) {
+            this.currentProfile.stats = { profileViews: 0, connections: 0, applications: 0, interviews: 0 };
+        }
+        this.currentProfile.stats.profileViews++;
+        
+        // Обновляем UI
+        document.getElementById('profileViews').textContent = this.currentProfile.stats.profileViews;
+        
+        // Сохраняем в базу данных
+        this.db.updateProfile(this.currentUser.id, { 
+            stats: this.currentProfile.stats 
+        });
+        
+        // Показываем детальную статистику
+        const statsHtml = `
+            <h3>Детальная статистика</h3>
+            <p>Просмотры профиля: ${this.currentProfile.stats.profileViews}</p>
+            <p>Контакты: ${this.currentProfile.stats.connections}</p>
+            <p>Отклики на вакансии: ${this.currentProfile.stats.applications || 0}</p>
+            <p>Собеседования: ${this.currentProfile.stats.interviews || 0}</p>
+        `;
+        
+        alert(statsHtml);
     }
 
     showNotification(message, type = 'info') {
-        // Создание уведомления
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.innerHTML = `
@@ -679,7 +715,6 @@ class ProfileManager {
             <button class="notification-close"><i class="fas fa-times"></i></button>
         `;
         
-        // Стили для уведомления
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -700,12 +735,10 @@ class ProfileManager {
         
         document.body.appendChild(notification);
         
-        // Кнопка закрытия
         notification.querySelector('.notification-close').addEventListener('click', () => {
             notification.remove();
         });
         
-        // Автоматическое закрытие
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.style.animation = 'slideOutRight 0.3s ease';
@@ -713,7 +746,6 @@ class ProfileManager {
             }
         }, 5000);
         
-        // Добавление CSS анимаций
         if (!document.querySelector('#notification-styles')) {
             const style = document.createElement('style');
             style.id = 'notification-styles';
@@ -745,14 +777,38 @@ class ProfileManager {
     }
 
     updateUI() {
-        // Увеличение счетчика просмотров при каждом посещении
-        this.currentUser.profileViews++;
-        document.getElementById('profileViews').textContent = this.currentUser.profileViews;
-        this.saveUserData();
+        // Обновляем счетчик просмотров при каждом посещении
+        if (!this.currentProfile.stats) {
+            this.currentProfile.stats = { profileViews: 0, connections: 0, applications: 0, interviews: 0 };
+        }
+        this.currentProfile.stats.profileViews++;
+        
+        document.getElementById('profileViews').textContent = this.currentProfile.stats.profileViews;
+        
+        // Сохраняем в базу данных
+        this.db.updateProfile(this.currentUser.id, { 
+            stats: this.currentProfile.stats 
+        });
+        
+        // Обновляем имя пользователя в хедере
+        const userNameElement = document.querySelector('.user-avatar');
+        if (userNameElement) {
+            userNameElement.title = this.currentUser.firstName;
+        }
     }
 }
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    new ProfileManager();
+    // Загружаем базу данных если не загружена
+    if (typeof db === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'database.js';
+        script.onload = function() {
+            new ProfileManager();
+        };
+        document.head.appendChild(script);
+    } else {
+        new ProfileManager();
+    }
 });

@@ -1,6 +1,9 @@
+
 class AuthManager {
     constructor() {
         this.currentTab = 'login';
+        this.db = window.db; // Используем нашу базу данных
+        this.db.seedTestData(); // Инициализируем тестовые данные
         this.handleUrlParams();
         this.init();
     }
@@ -17,6 +20,7 @@ class AuthManager {
     init() {
         this.bindEvents();
         this.checkExistingAuth();
+        this.updateHeaderAuthButtons(); // Обновляем кнопки в хедере
     }
 
     bindEvents() {
@@ -56,14 +60,19 @@ class AuthManager {
 
         // Кнопка продолжения после успешной регистрации
         document.getElementById('continueBtn').addEventListener('click', () => {
-            this.redirectToDashboard();
+            this.redirectToProfile();
+        });
+
+        // Кнопка "Забыли пароль"
+        document.querySelector('.forgot-password').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleForgotPassword();
         });
     }
 
-     switchTab(tab) {
+    switchTab(tab) {
         this.currentTab = tab;
         
-        // Обновляем URL без перезагрузки страницы
         const newUrl = new URL(window.location);
         if (tab === 'register') {
             newUrl.searchParams.set('action', 'signup');
@@ -71,17 +80,15 @@ class AuthManager {
             newUrl.searchParams.delete('action');
         }
         window.history.replaceState({}, '', newUrl);
-        // Обновляем активные кнопки
+        
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
 
-        // Обновляем активные формы
         document.querySelectorAll('.auth-form').forEach(form => {
             form.classList.toggle('active', form.id === `${tab}Form`);
         });
 
-        // Обновляем текст переключения
         const switchText = document.getElementById('switchText');
         const switchLink = document.getElementById('switchToRegister');
         
@@ -91,13 +98,11 @@ class AuthManager {
             switchText.innerHTML = 'Уже есть аккаунт? <a href="#" id="switchToRegister">Войти</a>';
         }
 
-        // Перепривязываем событие
         document.getElementById('switchToRegister').addEventListener('click', (e) => {
             e.preventDefault();
             this.switchTab(tab === 'login' ? 'register' : 'login');
         });
 
-        // Очищаем ошибки
         this.clearErrors();
     }
 
@@ -175,7 +180,6 @@ class AuthManager {
 
         let isValid = true;
 
-        // Валидация email
         if (!email) {
             this.showError('loginEmail', 'Email обязателен');
             isValid = false;
@@ -184,7 +188,6 @@ class AuthManager {
             isValid = false;
         }
 
-        // Валидация пароля
         if (!password) {
             this.showError('loginPassword', 'Пароль обязателен');
             isValid = false;
@@ -195,11 +198,35 @@ class AuthManager {
 
         if (!isValid) return;
 
-        // Имитация запроса к серверу
         try {
-            await this.mockApiCall('login', { email, password, rememberMe });
-            this.saveAuthData({ email, rememberMe });
-            this.redirectToDashboard();
+            // Поиск пользователя в базе данных
+            const user = this.db.getUserByEmail(email);
+            
+            if (!user) {
+                throw new Error('Пользователь не найден');
+            }
+
+            if (user.password !== password) {
+                throw new Error('Неверный пароль');
+            }
+
+            // Создание сессии
+            this.db.createSession(user.id);
+            
+            // Сохранение данных для "Запомнить меня"
+            if (rememberMe) {
+                localStorage.setItem('handshake_remember', JSON.stringify({ email }));
+            } else {
+                localStorage.removeItem('handshake_remember');
+            }
+
+            this.showNotification('Успешный вход!', 'success');
+            
+            // Перенаправление на главную страницу
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+
         } catch (error) {
             this.showError('loginPassword', 'Неверный email или пароль');
         }
@@ -219,19 +246,16 @@ class AuthManager {
 
         let isValid = true;
 
-        // Валидация имени
         if (!firstName) {
             this.showError('firstName', 'Имя обязательно');
             isValid = false;
         }
 
-        // Валидация фамилии
         if (!lastName) {
             this.showError('lastName', 'Фамилия обязательна');
             isValid = false;
         }
 
-        // Валидация email
         if (!email) {
             this.showError('registerEmail', 'Email обязателен');
             isValid = false;
@@ -240,13 +264,11 @@ class AuthManager {
             isValid = false;
         }
 
-        // Валидация типа пользователя
         if (!userType) {
             this.showError('userType', 'Выберите тип аккаунта');
             isValid = false;
         }
 
-        // Валидация пароля
         const passwordStrength = this.checkPasswordStrength(password);
         if (!password) {
             this.showError('registerPassword', 'Пароль обязателен');
@@ -259,13 +281,11 @@ class AuthManager {
             isValid = false;
         }
 
-        // Подтверждение пароля
         if (password !== confirmPassword) {
             this.showError('confirmPassword', 'Пароли не совпадают');
             isValid = false;
         }
 
-        // Согласие с условиями
         if (!agreeTerms) {
             this.showError('agreeTerms', 'Необходимо согласие с условиями');
             isValid = false;
@@ -273,69 +293,55 @@ class AuthManager {
 
         if (!isValid) return;
 
-        // Имитация запроса к серверу
         try {
-            await this.mockApiCall('register', {
+            // Проверка существующего пользователя
+            const existingUser = this.db.getUserByEmail(email);
+            if (existingUser) {
+                throw new Error('Пользователь с таким email уже существует');
+            }
+
+            // Создание пользователя
+            const user = this.db.createUser({
+                email,
+                password,
                 firstName,
                 lastName,
-                email,
                 userType,
-                password
+                verified: false
             });
+
+            // Создание профиля пользователя
+            const profile = this.db.createProfile({
+                userId: user.id,
+                name: `${firstName} ${lastName}`,
+                title: userType === 'student' ? 'Студент' : 
+                       userType === 'employer' ? 'Работодатель' : 'Карьерный центр',
+                location: '',
+                about: '',
+                skills: [],
+                languages: [],
+                education: [],
+                experience: [],
+                careerGoals: []
+            });
+
+            // Автоматический вход после регистрации
+            this.db.createSession(user.id);
             
             this.showSuccessMessage();
+            
+            // Обновляем кнопки на главной странице
+            this.updateHeaderAuthButtons();
+
         } catch (error) {
-            this.showError('registerEmail', 'Пользователь с таким email уже существует');
-        }
-    }
-
-    async mockApiCall(endpoint, data) {
-        // Имитация задержки сети
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Имитация проверки существующего пользователя
-        if (endpoint === 'register') {
-            const users = JSON.parse(localStorage.getItem('handshake_users') || '[]');
-            const userExists = users.some(user => user.email === data.email);
-            
-            if (userExists) {
-                throw new Error('User already exists');
-            }
-
-            // Сохраняем пользователя
-            users.push({
-                ...data,
-                id: Date.now(),
-                createdAt: new Date().toISOString()
-            });
-            localStorage.setItem('handshake_users', JSON.stringify(users));
-        }
-
-        // Для входа проверяем существование пользователя
-        if (endpoint === 'login') {
-            const users = JSON.parse(localStorage.getItem('handshake_users') || '[]');
-            const user = users.find(u => u.email === data.email && u.password === data.password);
-            
-            if (!user) {
-                throw new Error('Invalid credentials');
-            }
-        }
-
-        return { success: true, message: 'Operation successful' };
-    }
-
-    saveAuthData(authData) {
-        if (authData.rememberMe) {
-            localStorage.setItem('handshake_auth', JSON.stringify(authData));
-        } else {
-            sessionStorage.setItem('handshake_auth', JSON.stringify(authData));
+            this.showError('registerEmail', error.message || 'Ошибка при регистрации');
         }
     }
 
     checkExistingAuth() {
-        const authData = localStorage.getItem('handshake_auth') || sessionStorage.getItem('handshake_auth');
-        if (authData) {
-            const { email } = JSON.parse(authData);
+        const rememberData = localStorage.getItem('handshake_remember');
+        if (rememberData) {
+            const { email } = JSON.parse(rememberData);
             document.getElementById('loginEmail').value = email;
             document.getElementById('rememberMe').checked = true;
         }
@@ -345,15 +351,97 @@ class AuthManager {
         document.getElementById('successMessage').classList.remove('hidden');
     }
 
-    redirectToDashboard() {
-        // В реальном приложении здесь был бы redirect на главную страницу
-        alert('Успешный вход! Перенаправление на главную страницу...');
-        window.location.href = 'main.html'; // Возврат на главную страницу
+    redirectToProfile() {
+        window.location.href = 'profile.html';
     }
 
     handleSocialAuth(provider) {
-        // Имитация социальной авторизации
-        alert(`Авторизация через ${provider} будет реализована в будущем`);
+        this.showNotification(`Авторизация через ${provider} будет реализована в будущем`, 'info');
+    }
+
+    handleForgotPassword() {
+        const email = prompt('Введите ваш email для восстановления пароля:');
+        if (email && this.validateEmail(email)) {
+            // В реальном приложении здесь была бы отправка email
+            this.showNotification('Инструкции по восстановлению отправлены на email', 'success');
+        } else if (email) {
+            this.showNotification('Введите корректный email', 'error');
+        }
+    }
+
+    updateHeaderAuthButtons() {
+        // Эта функция обновит кнопки на главной странице
+        // Она будет вызвана из main.js после загрузки страницы
+        const currentUser = this.db.getCurrentUser();
+        const authButtons = document.querySelector('.auth-buttons');
+        
+        if (authButtons) {
+            if (currentUser) {
+                authButtons.innerHTML = `
+                    <a href="profile.html" class="btn btn-login">
+                        <i class="fas fa-user"></i> Профиль
+                    </a>
+                    <a href="#" class="btn btn-signup" id="logoutBtnMain">
+                        Выйти
+                    </a>
+                `;
+                
+                document.getElementById('logoutBtnMain').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.db.logout();
+                    window.location.href = 'index.html';
+                });
+            } else {
+                authButtons.innerHTML = `
+                    <a href="auth/auth.html" class="btn btn-login">Войти</a>
+                    <a href="auth/auth.html" class="btn btn-signup">Регистрация</a>
+                `;
+            }
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        // Создание уведомления
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="notification-close"><i class="fas fa-times"></i></button>
+        `;
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            z-index: 3000;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.remove();
+        });
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
     }
 }
 
