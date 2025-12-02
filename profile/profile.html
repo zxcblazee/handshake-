@@ -1,0 +1,650 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - Handshake</title>
+    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="profile-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="image/logo.png" alt="Handshake" class="logo-img">
+                        <span>Handshake</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.html"><i class="fas fa-home"></i> Главная</a>
+                    <a href="#" class="active"><i class="fas fa-user"></i> Профиль</a>
+                    <a href="#"><i class="fas fa-briefcase"></i> Вакансии</a>
+                    <a href="#"><i class="fas fa-comments"></i> Сообщения</a>
+                    <a href="#"><i class="fas fa-bell"></i> Уведомления</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="btn-search"><i class="fas fa-search"></i></button>
+                    <div class="user-menu">
+                        <div class="user-avatar" id="userMenuToggle">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user123" alt="Аватар">
+                        </div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="#"><i class="fas fa-user"></i> Мой профиль</a>
+                            <a href="#"><i class="fas fa-cog"></i> Настройки</a>
+                            <a href="#"><i class="fas fa-question-circle"></i> Помощь</a>
+                            <hr>
+                            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <div class="container">
+            <div class="profile-layout">
+                <aside class="profile-sidebar">
+                    <div class="user-card">
+                        <div class="user-avatar-large">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user123" alt="Аватар" id="userAvatar">
+                            <button class="avatar-upload" id="uploadAvatarBtn">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div class="user-info">
+                            <h2 id="userName">Иван Иванов</h2>
+                            <p class="user-title" id="userTitle">Студент, МГУ им. Ломоносова</p>
+                            <p class="user-location"><i class="fas fa-map-marker-alt"></i> Москва, Россия</p>
+                            <div class="user-stats">
+                                <div class="stat">
+                                    <span class="stat-value" id="profileViews">128</span>
+                                    <span class="stat-label">просмотров</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="connections">47</span>
+                                    <span class="stat-label">контактов</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn btn-primary" id="editProfileBtn">
+                                <i class="fas fa-edit"></i> Редактировать профиль
+                            </button>
+                            <button class="btn btn-outline" id="shareProfileBtn">
+                                <i class="fas fa-share-alt"></i> Поделиться
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-graduation-cap"></i> Образование</h3>
+                        <div class="education-item" id="educationList">
+                            <div class="education-card">
+                                <h4>МГУ им. Ломоносова</h4>
+                                <p>Бакалавр информатики</p>
+                                <span class="date">2021 - 2025</span>
+                            </div>
+                        </div>
+                        <button class="btn-text" id="addEducationBtn"><i class="fas fa-plus"></i> Добавить образование</button>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-star"></i> Навыки</h3>
+                        <div class="skills-list" id="skillsList">
+                            <span class="skill-tag">JavaScript <button class="skill-remove"><i class="fas fa-times"></i></button></span>
+                            <span class="skill-tag">Python <button class="skill-remove"><i class="fas fa-times"></i></button></span>
+                            <span class="skill-tag">React <button class="skill-remove"><i class="fas fa-times"></i></button></span>
+                            <span class="skill-tag">UI/UX Дизайн <button class="skill-remove"><i class="fas fa-times"></i></button></span>
+                            <span class="skill-tag">Английский язык <button class="skill-remove"><i class="fas fa-times"></i></button></span>
+                        </div>
+                        <button class="btn-text" id="addSkillBtn"><i class="fas fa-plus"></i> Добавить навык</button>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3><i class="fas fa-language"></i> Языки</h3>
+                        <div class="languages-list" id="languagesList">
+                            <div class="language-item">
+                                <span>Русский</span>
+                                <span class="language-level">Родной</span>
+                            </div>
+                            <div class="language-item">
+                                <span>Английский</span>
+                                <span class="language-level">B2</span>
+                            </div>
+                        </div>
+                        <button class="btn-text" id="addLanguageBtn"><i class="fas fa-plus"></i> Добавить язык</button>
+                    </div>
+                </aside>
+
+                <div class="profile-content">
+                    <div class="profile-tabs">
+                        <button class="tab-btn active" data-tab="about">О себе</button>
+                        <button class="tab-btn" data-tab="experience">Опыт работы</button>
+                        <button class="tab-btn" data-tab="portfolio">Портфолио</button>
+                        <button class="tab-btn" data-tab="activity">Активность</button>
+                        <button class="tab-btn" data-tab="settings">Настройки</button>
+                    </div>
+
+                    <div class="tab-content active" id="aboutTab">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-user-circle"></i> О себе</h3>
+                                <button class="btn-edit" data-edit="about"><i class="fas fa-edit"></i></button>
+                            </div>
+                            <div class="card-body">
+                                <p id="aboutText">Студент 3-го курса факультета вычислительной математики и кибернетики. Увлекаюсь веб-разработкой, машинным обучением и анализом данных. Ищу стажировку в IT-компании для применения знаний на практике и профессионального роста.</p>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-briefcase"></i> Цели карьеры</h3>
+                                <button class="btn-edit" data-edit="goals"><i class="fas fa-edit"></i></button>
+                            </div>
+                            <div class="card-body">
+                                <div class="career-goals" id="careerGoals">
+                                    <div class="goal-item">
+                                        <i class="fas fa-bullseye"></i>
+                                        <span>Найти стажировку frontend-разработчика</span>
+                                    </div>
+                                    <div class="goal-item">
+                                        <i class="fas fa-bullseye"></i>
+                                        <span>Выучить TypeScript и Redux</span>
+                                    </div>
+                                    <div class="goal-item">
+                                        <i class="fas fa-bullseye"></i>
+                                        <span>Построить профессиональную сеть контактов</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-certificate"></i> Сертификаты</h3>
+                                <button class="btn-add" id="addCertificateBtn"><i class="fas fa-plus"></i> Добавить</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="certificates-grid" id="certificatesList">
+                                    <div class="certificate-card">
+                                        <div class="certificate-icon">
+                                            <i class="fas fa-certificate"></i>
+                                        </div>
+                                        <div class="certificate-info">
+                                            <h4>Frontend Разработчик</h4>
+                                            <p>Яндекс.Практикум · 2023</p>
+                                            <a href="#" class="certificate-link">Просмотреть сертификат</a>
+                                        </div>
+                                    </div>
+                                    <div class="certificate-card">
+                                        <div class="certificate-icon">
+                                            <i class="fas fa-certificate"></i>
+                                        </div>
+                                        <div class="certificate-info">
+                                            <h4>React для начинающих</h4>
+                                            <p>Coursera · 2022</p>
+                                            <a href="#" class="certificate-link">Просмотреть сертификат</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="experienceTab">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-history"></i> Опыт работы</h3>
+                                <button class="btn-add" id="addExperienceBtn"><i class="fas fa-plus"></i> Добавить</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline" id="experienceTimeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Лето 2023</div>
+                                        <div class="timeline-content">
+                                            <h4>Frontend-разработчик (стажировка)</h4>
+                                            <p class="company">ООО "Технологии Будущего"</p>
+                                            <p>Разработка пользовательского интерфейса для внутренней системы управления. Работа с React, Redux, TypeScript.</p>
+                                        </div>
+                                        <button class="timeline-edit"><i class="fas fa-edit"></i></button>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">2022 - наст. время</div>
+                                        <div class="timeline-content">
+                                            <h4>Фриланс-разработчик</h4>
+                                            <p class="company">Самостоятельная занятость</p>
+                                            <p>Создание веб-сайтов и приложений для малого бизнеса. Работа с клиентами, проектирование, разработка и поддержка.</p>
+                                        </div>
+                                        <button class="timeline-edit"><i class="fas fa-edit"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-project-diagram"></i> Проекты</h3>
+                                <button class="btn-add" id="addProjectBtn"><i class="fas fa-plus"></i> Добавить</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="projects-grid" id="projectsList">
+                                    <div class="project-card">
+                                        <div class="project-image">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                        <div class="project-info">
+                                            <h4>E-commerce платформа</h4>
+                                            <p>Полнофункциональный интернет-магазин на React и Node.js</p>
+                                            <div class="project-tags">
+                                                <span>React</span>
+                                                <span>Node.js</span>
+                                                <span>MongoDB</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="project-card">
+                                        <div class="project-image">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="project-info">
+                                            <h4>Анализ данных о погоде</h4>
+                                            <p>Визуализация и анализ метеорологических данных с использованием Python</p>
+                                            <div class="project-tags">
+                                                <span>Python</span>
+                                                <span>Pandas</span>
+                                                <span>Matplotlib</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="portfolioTab">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-images"></i> Портфолио</h3>
+                                <button class="btn-add" id="addPortfolioBtn"><i class="fas fa-plus"></i> Добавить работу</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="portfolio-grid" id="portfolioGrid">
+                                    <div class="portfolio-item">
+                                        <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Проект 1">
+                                        <div class="portfolio-overlay">
+                                            <h4>Дизайн мобильного приложения</h4>
+                                            <p>UI/UX Design</p>
+                                        </div>
+                                    </div>
+                                    <div class="portfolio-item">
+                                        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Проект 2">
+                                        <div class="portfolio-overlay">
+                                            <h4>Веб-приложение для управления задачами</h4>
+                                            <p>Fullstack Development</p>
+                                        </div>
+                                    </div>
+                                    <div class="portfolio-item">
+                                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Проект 3">
+                                        <div class="portfolio-overlay">
+                                            <h4>Дашборд для анализа данных</h4>
+                                            <p>Data Visualization</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="activityTab">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-line"></i> Активность</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="activity-chart" id="activityChart">
+                                    <div class="chart-placeholder">
+                                        <p>График активности за последние 30 дней</p>
+                                        <div class="chart-bars">
+                                            <div class="bar" style="height: 60%;" title="Пн: 12 действий"></div>
+                                            <div class="bar" style="height: 80%;" title="Вт: 16 действий"></div>
+                                            <div class="bar" style="height: 40%;" title="Ср: 8 действий"></div>
+                                            <div class="bar" style="height: 90%;" title="Чт: 18 действий"></div>
+                                            <div class="bar" style="height: 70%;" title="Пт: 14 действий"></div>
+                                            <div class="bar" style="height: 30%;" title="Сб: 6 действий"></div>
+                                            <div class="bar" style="height: 50%;" title="Вс: 10 действий"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-rss"></i> Недавние действия</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="activity-feed" id="activityFeed">
+                                    <div class="activity-item">
+                                        <div class="activity-icon success">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p>Вы подали заявку на стажировку в <strong>Яндекс</strong></p>
+                                            <span class="activity-time">2 часа назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon info">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p>Ваш профиль просмотрел рекрутер из <strong>Сбера</strong></p>
+                                            <span class="activity-time">Вчера, 15:30</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon warning">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p>Срок подачи заявки в <strong>Тинькофф</strong> истекает через 3 дня</p>
+                                            <span class="activity-time">2 дня назад</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p>Вы добавили новый навык: <strong>TypeScript</strong></p>
+                                            <span class="activity-time">3 дня назад</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="settingsTab">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-cog"></i> Настройки профиля</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="settingsForm">
+                                    <div class="form-group">
+                                        <label for="visibility">Видимость профиля</label>
+                                        <select id="visibility">
+                                            <option value="public">Публичный (видят все)</option>
+                                            <option value="employers">Только работодателям</option>
+                                            <option value="private">Только я</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="notifications">Уведомления</label>
+                                        <div class="checkbox-group">
+                                            <label class="checkbox">
+                                                <input type="checkbox" id="notifEmail" checked>
+                                                <span class="checkmark"></span>
+                                                Email-уведомления
+                                            </label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" id="notifMessages" checked>
+                                                <span class="checkmark"></span>
+                                                Новые сообщения
+                                            </label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" id="notifJobs">
+                                                <span class="checkmark"></span>
+                                                Подходящие вакансии
+                                            </label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" id="notifViews" checked>
+                                                <span class="checkmark"></span>
+                                                Просмотры профиля
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="emailFrequency">Частота email-рассылок</label>
+                                        <select id="emailFrequency">
+                                            <option value="daily">Ежедневно</option>
+                                            <option value="weekly" selected>Еженедельно</option>
+                                            <option value="monthly">Ежемесячно</option>
+                                            <option value="never">Никогда</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">Сохранить настройки</button>
+                                        <button type="button" class="btn btn-danger" id="deleteAccountBtn">Удалить аккаунт</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-shield-alt"></i> Безопасность</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="securityForm">
+                                    <div class="form-group">
+                                        <label for="currentPassword">Текущий пароль</label>
+                                        <input type="password" id="currentPassword" placeholder="Введите текущий пароль">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="newPassword">Новый пароль</label>
+                                        <input type="password" id="newPassword" placeholder="Введите новый пароль">
+                                        <div class="password-strength">
+                                            <div class="strength-bar"></div>
+                                            <span class="strength-text">Надежность пароля</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="confirmNewPassword">Подтвердите новый пароль</label>
+                                        <input type="password" id="confirmNewPassword" placeholder="Подтвердите новый пароль">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Изменить пароль</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="profile-sidebar-right">
+                    <div class="sidebar-card">
+                        <h3><i class="fas fa-chart-pie"></i> Статистика профиля</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-number">85%</span>
+                                <span class="stat-label">Заполненность</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">24</span>
+                                <span class="stat-label">Откликов</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">8</span>
+                                <span class="stat-label">Интервью</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">3</span>
+                                <span class="stat-label">Предложения</span>
+                            </div>
+                        </div>
+                        <button class="btn-text" id="viewFullStatsBtn">Подробная статистика →</button>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3><i class="fas fa-bullseye"></i> Рекомендации для вас</h3>
+                        <ul class="recommendations-list">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Добавьте больше проектов в портфолио</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Укажите ожидаемую зарплату</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Пройдите тесты по JavaScript</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Обновите резюме</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3><i class="fas fa-building"></i> Интересные компании</h3>
+                        <div class="companies-list">
+                            <div class="company-item">
+                                <img src="image/yandex-logo.png" alt="Яндекс">
+                                <div>
+                                    <h4>Яндекс</h4>
+                                    <p>5 подходящих вакансий</p>
+                                </div>
+                            </div>
+                            <div class="company-item">
+                                <img src="image/tinkoff-logo.png" alt="Тинькофф">
+                                <div>
+                                    <h4>Тинькофф</h4>
+                                    <p>3 подходящих вакансий</p>
+                                </div>
+                            </div>
+                            <div class="company-item">
+                                <img src="image/vk-logo.png" alt="VK">
+                                <div>
+                                    <h4>VK</h4>
+                                    <p>7 подходящих вакансий</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3><i class="fas fa-calendar-alt"></i> Предстоящие события</h3>
+                        <div class="events-list">
+                            <div class="event-item">
+                                <div class="event-date">
+                                    <span class="event-day">15</span>
+                                    <span class="event-month">Мар</span>
+                                </div>
+                                <div class="event-info">
+                                    <h4>Техническое собеседование</h4>
+                                    <p>Яндекс · 14:00</p>
+                                </div>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-date">
+                                    <span class="event-day">18</span>
+                                    <span class="event-month">Мар</span>
+                                </div>
+                                <div class="event-info">
+                                    <h4>Карьерная выставка</h4>
+                                    <p>МГУ · 11:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Редактирование</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="form-group">
+                        <label for="editField">Значение</label>
+                        <textarea id="editField" rows="4" placeholder="Введите текст..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelEditBtn">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="addSkillModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить навык</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newSkill">Навык</label>
+                    <input type="text" id="newSkill" placeholder="Например: JavaScript, Python, UI/UX Design">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary cancel-add">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveSkillBtn">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="uploadAvatarModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Сменить аватар</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="avatar-upload-area" id="avatarDropArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Перетащите изображение сюда или</p>
+                    <button class="btn btn-outline" id="browseAvatarBtn">Выберите файл</button>
+                    <input type="file" id="avatarFile" accept="image/*" hidden>
+                    <p class="file-info">PNG, JPG до 5MB</p>
+                </div>
+                <div class="avatar-preview" id="avatarPreview">
+                    <img src="" alt="Предпросмотр">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary cancel-upload">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveAvatarBtn" disabled>Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="profile-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#">Конфиденциальность</a>
+                    <a href="#">Условия использования</a>
+                    <a href="#">Справка</a>
+                    <a href="#">Контакты</a>
+                </div>
+                <div class="footer-copyright">
+                    <p>&copy; 2024 Handshake. Все права защищены.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="profile.js"></script>
+</body>
+</html>
