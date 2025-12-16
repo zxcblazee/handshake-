@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профиль - Handshake</title>
-    <link rel="stylesheet" href="/profile/profile.css">
+    <link rel="stylesheet" href="CSS/profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -123,9 +123,7 @@
                 <div class="profile-content">
                     <div class="profile-tabs">
                         <button class="tab-btn active" data-tab="about">О себе</button>
-                        <button class="tab-btn" data-tab="experience">Опыт работы</button>
-                        <button class="tab-btn" data-tab="portfolio">Портфолио</button>
-                        <button class="tab-btn" data-tab="activity">Активность</button>
+                        <button class="tab-btn" data-tab="experience">Опыт</button>
                         <button class="tab-btn" data-tab="settings">Настройки</button>
                     </div>
 
@@ -136,59 +134,20 @@
                                 <button class="btn-edit" data-edit="about"><i class="fas fa-edit"></i></button>
                             </div>
                             <div class="card-body">
-                                <p id="aboutText">Студент 3-го курса факультета вычислительной математики и кибернетики. Увлекаюсь веб-разработкой, машинным обучением и анализом данных. Ищу стажировку в IT-компании для применения знаний на практике и профессионального роста.</p>
+                                <p id="aboutText">Расскажите о себе...</p>
                             </div>
                         </div>
 
                         <div class="content-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-briefcase"></i> Цели карьеры</h3>
+                                <h3><i class="fas fa-bullseye"></i> Цели карьеры</h3>
                                 <button class="btn-edit" data-edit="goals"><i class="fas fa-edit"></i></button>
                             </div>
                             <div class="card-body">
                                 <div class="career-goals" id="careerGoals">
                                     <div class="goal-item">
                                         <i class="fas fa-bullseye"></i>
-                                        <span>Найти стажировку frontend-разработчика</span>
-                                    </div>
-                                    <div class="goal-item">
-                                        <i class="fas fa-bullseye"></i>
-                                        <span>Выучить TypeScript и Redux</span>
-                                    </div>
-                                    <div class="goal-item">
-                                        <i class="fas fa-bullseye"></i>
-                                        <span>Построить профессиональную сеть контактов</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="content-card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-certificate"></i> Сертификаты</h3>
-                                <button class="btn-add" id="addCertificateBtn"><i class="fas fa-plus"></i> Добавить</button>
-                            </div>
-                            <div class="card-body">
-                                <div class="certificates-grid" id="certificatesList">
-                                    <div class="certificate-card">
-                                        <div class="certificate-icon">
-                                            <i class="fas fa-certificate"></i>
-                                        </div>
-                                        <div class="certificate-info">
-                                            <h4>Frontend Разработчик</h4>
-                                            <p>Яндекс.Практикум · 2023</p>
-                                            <a href="#" class="certificate-link">Просмотреть сертификат</a>
-                                        </div>
-                                    </div>
-                                    <div class="certificate-card">
-                                        <div class="certificate-icon">
-                                            <i class="fas fa-certificate"></i>
-                                        </div>
-                                        <div class="certificate-info">
-                                            <h4>React для начинающих</h4>
-                                            <p>Coursera · 2022</p>
-                                            <a href="#" class="certificate-link">Просмотреть сертификат</a>
-                                        </div>
+                                        <span>Найти стажировку</span>
                                     </div>
                                 </div>
                             </div>
@@ -198,32 +157,79 @@
                     <div class="tab-content" id="experienceTab">
                         <div class="content-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-history"></i> Опыт работы</h3>
+                                <h3><i class="fas fa-briefcase"></i> Опыт работы</h3>
                                 <button class="btn-add" id="addExperienceBtn"><i class="fas fa-plus"></i> Добавить</button>
                             </div>
                             <div class="card-body">
-                                <div class="timeline" id="experienceTimeline">
-                                    <div class="timeline-item">
-                                        <div class="timeline-date">Лето 2023</div>
-                                        <div class="timeline-content">
-                                            <h4>Frontend-разработчик (стажировка)</h4>
-                                            <p class="company">ООО "Технологии Будущего"</p>
-                                            <p>Разработка пользовательского интерфейса для внутренней системы управления. Работа с React, Redux, TypeScript.</p>
-                                        </div>
-                                        <button class="timeline-edit"><i class="fas fa-edit"></i></button>
-                                    </div>
-                                    <div class="timeline-item">
-                                        <div class="timeline-date">2022 - наст. время</div>
-                                        <div class="timeline-content">
-                                            <h4>Фриланс-разработчик</h4>
-                                            <p class="company">Самостоятельная занятость</p>
-                                            <p>Создание веб-сайтов и приложений для малого бизнеса. Работа с клиентами, проектирование, разработка и поддержка.</p>
-                                        </div>
-                                        <button class="timeline-edit"><i class="fas fa-edit"></i></button>
-                                    </div>
+                                <div id="experienceList">
+                                    <p class="empty-state">Опыт работы пока не добавлен</p>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="tab-content" id="settingsTab">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-cog"></i> Настройки профиля</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="settingsForm">
+                                    <div class="form-group">
+                                        <label>Видимость профиля</label>
+                                        <select id="profileVisibility">
+                                            <option value="public">Публичный</option>
+                                            <option value="employers">Только работодателям</option>
+                                            <option value="private">Приватный</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Уведомления по email</label>
+                                        <select id="emailFrequency">
+                                            <option value="weekly">Еженедельно</option>
+                                            <option value="monthly">Ежемесячно</option>
+                                            <option value="never">Никогда</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Сохранить настройки</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-key"></i> Безопасность</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="securityForm">
+                                    <div class="form-group">
+                                        <label for="currentPassword">Текущий пароль</label>
+                                        <input type="password" id="currentPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="newPassword">Новый пароль</label>
+                                        <input type="password" id="newPassword" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirmNewPassword">Подтвердите новый пароль</label>
+                                        <input type="password" id="confirmNewPassword" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Изменить пароль</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="content-card danger">
+                            <div class="card-header">
+                                <h3><i class="fas fa-exclamation-triangle"></i> Опасная зона</h3>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">Удаление аккаунта необратимо. Все данные будут потеряны.</p>
+                                <button id="deleteAccountBtn" class="btn btn-danger">Удалить аккаунт</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                         <div class="content-card">
                             <div class="card-header">
@@ -645,6 +651,6 @@
         </div>
     </footer>
 
-    <script src="/profile/profile.js"></script>
+    <script src="JS/profile.js"></script>
 </body>
 </html>

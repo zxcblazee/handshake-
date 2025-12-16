@@ -3,7 +3,7 @@
 if (typeof db === 'undefined') {
     // Загружаем базу данных если не загружена
     const script = document.createElement('script');
-    script.src = 'database.js';
+    script.src = 'JS/database.js';
     script.onload = function() {
         initApplication();
     };

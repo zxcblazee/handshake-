@@ -233,9 +233,9 @@ class AuthManager {
 
         this.showNotification('Успешный вход!', 'success');
         
-        // ИСПРАВЛЕНО: перенаправление на главную страницу
+        // ИСПРАВЛЕНО: перенаправление на страницу профиля
         setTimeout(() => {
-            window.location.href = 'index.html'; // ИСПРАВЛЕН ПУТЬ
+            window.location.href = 'profile.html'; // ИСПРАВЛЕН ПУТЬ
         }, 1500);
 
     } catch (error) {
@@ -338,10 +338,15 @@ class AuthManager {
             // Автоматический вход после регистрации
             this.db.createSession(user.id);
             
-            this.showSuccessMessage();
+            this.showNotification('Регистрация успешна! Добро пожаловать!', 'success');
             
             // Обновляем кнопки на главной странице
             this.updateHeaderAuthButtons();
+
+            // Перенаправление на профиль
+            setTimeout(() => {
+                window.location.href = 'profile.html';
+            }, 1500);
 
         } catch (error) {
             this.showError('registerEmail', error.message || 'Ошибка при регистрации');
@@ -403,8 +408,8 @@ class AuthManager {
                 });
             } else {
                 authButtons.innerHTML = `
-                    <a href="auth/auth.html" class="btn btn-login">Войти</a>
-                    <a href="auth/auth.html" class="btn btn-signup">Регистрация</a>
+                    <a href="auth.html" class="btn btn-login">Войти</a>
+                    <a href="auth.html" class="btn btn-signup">Регистрация</a>
                 `;
             }
         }

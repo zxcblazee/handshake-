@@ -8,7 +8,7 @@ class ProfileManager {
         
         if (!this.currentUser) {
             // Если пользователь не авторизован, перенаправляем на страницу входа
-            window.location.href = 'auth/auth.html';
+            window.location.href = 'auth.html';
             return;
         }
         
@@ -69,6 +69,9 @@ class ProfileManager {
         
         // Образование
         this.updateEducationList();
+        
+        // Опыт работы
+        this.updateExperienceList();
         
         // Цели карьеры
         this.updateCareerGoals();
@@ -140,6 +143,11 @@ class ProfileManager {
         // Добавление образования
         document.getElementById('addEducationBtn').addEventListener('click', () => {
             this.openAddEducationModal();
+        });
+
+        // Добавление опыта работы
+        document.getElementById('addExperienceBtn').addEventListener('click', () => {
+            this.openAddExperienceModal();
         });
 
         // Добавление языка
@@ -385,6 +393,21 @@ class ProfileManager {
                 this.currentProfile.languages.push(languageItem);
                 this.updateLanguagesList();
                 break;
+            case 'add_experience':
+                const expLines = value.split('\n');
+                const experienceItem = {
+                    position: expLines[0] || '',
+                    company: expLines[1] || '',
+                    period: expLines[2] || '',
+                    description: expLines[3] || ''
+                };
+                
+                if (!this.currentProfile.experience) {
+                    this.currentProfile.experience = [];
+                }
+                this.currentProfile.experience.push(experienceItem);
+                this.updateExperienceList();
+                break;
         }
 
         // Сохраняем изменения в базе данных
@@ -485,6 +508,30 @@ class ProfileManager {
         });
     }
 
+    updateExperienceList() {
+        const experienceList = document.getElementById('experienceList');
+        experienceList.innerHTML = '';
+
+        const experiences = this.currentProfile.experience || [];
+        
+        if (experiences.length === 0) {
+            experienceList.innerHTML = '<p class="empty-state">Опыт работы пока не добавлен</p>';
+            return;
+        }
+
+        experiences.forEach(exp => {
+            const expCard = document.createElement('div');
+            expCard.className = 'experience-card';
+            expCard.innerHTML = `
+                <h4>${exp.position}</h4>
+                <p class="company">${exp.company}</p>
+                <p class="period">${exp.period}</p>
+                <p>${exp.description}</p>
+            `;
+            experienceList.appendChild(expCard);
+        });
+    }
+
     updateCareerGoals() {
         const goalsList = document.getElementById('careerGoals');
         goalsList.innerHTML = '';
@@ -503,14 +550,7 @@ class ProfileManager {
     updateSettings() {
         if (this.currentProfile.settings) {
             // Видимость профиля
-            document.getElementById('visibility').value = this.currentProfile.settings.visibility || 'employers';
-            
-            // Уведомления
-            const notifs = this.currentProfile.settings.notifications || {};
-            document.getElementById('notifEmail').checked = notifs.email !== false;
-            document.getElementById('notifMessages').checked = notifs.messages !== false;
-            document.getElementById('notifJobs').checked = notifs.jobs || false;
-            document.getElementById('notifViews').checked = notifs.views !== false;
+            document.getElementById('profileVisibility').value = this.currentProfile.settings.visibility || 'employers';
             
             // Частота рассылок
             document.getElementById('emailFrequency').value = this.currentProfile.settings.emailFrequency || 'weekly';
@@ -519,13 +559,7 @@ class ProfileManager {
 
     saveSettings() {
         this.currentProfile.settings = {
-            visibility: document.getElementById('visibility').value,
-            notifications: {
-                email: document.getElementById('notifEmail').checked,
-                messages: document.getElementById('notifMessages').checked,
-                jobs: document.getElementById('notifJobs').checked,
-                views: document.getElementById('notifViews').checked
-            },
+            visibility: document.getElementById('profileVisibility').value,
             emailFrequency: document.getElementById('emailFrequency').value
         };
 
